@@ -100,3 +100,26 @@ print(paste("Kendall Correlation coef:", round(kendall_corr, 3)))
 
 The relationship is weak to moderate (0.423 Pearson, 0.361 Spearman, 0.244 Kendall).
 In a word, some easy questions do have higher discrimination power. However, not all easy questions discriminate well, and medium-difficulty questions (0.4-0.6) tend to be the best discriminators.
+
+```{r}
+#Combine the number of flaws into the data set
+Flaws <- readxl::read_xlsx("Final Item Flaw Scores 2025.xlsx")
+flaws <- c(0, 2, 1, 1, 0, 0, 2, 1, 0, 0, 1, 1, 1, 2, 3, 3, 1, 5, 3, 5)
+item_difficulty$Flaws <- flaws
+head(item_difficulty)
+spearman_corr <- cor(item_difficulty$Flaws, item_difficulty$Item_Difficulty, method = "spearman")
+print(spearman_corr)
+```
+
+```{r}
+point_biserial$Flaws <- flaws
+spearman_corr1 <- cor(point_biserial$Flaws, point_biserial$Point_Biserial_Correlation, method = "spearman")
+print(spearman_corr1)
+```
+```{r}
+item_difficulty$point_biserial <- point_biserial$Point_Biserial_Correlation
+spearman_corr2 <- cor(item_difficulty$Item_Difficulty, item_difficulty$point_biserial, method = "spearman")
+print(spearman_corr2)
+```
+
+
