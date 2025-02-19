@@ -29,7 +29,6 @@ question_names <- paste0("Q", 1:20)  # Generates Q1, Q2, ..., Q20
 colnames(df_students)[2:21] <- question_names
 
 head(df_students)
-
 ```
 
 ```{r}
