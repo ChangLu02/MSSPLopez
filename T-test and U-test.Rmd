@@ -1,0 +1,131 @@
+---
+title: "T_test"
+author: "sts"
+date: "2025-02-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Since U-test and T-test only focus on binary data, so some category data like 'Age Arrive USA', continous data 'quiz time(categorized by 10 minutes)' don't work.
+
+1. quiz time(categorized by 10 minutes)
+
+2. English Proficiency
+
+3. Race
+
+4. Home Language
+
+#### Mann-Whitney U Test
+
+1. Accomodations
+
+2. Age Arrive USA
+
+3. Sex
+
+4. Born in USA
+```{r}
+df <- read_excel("MAMS and Dental Combined for Analysis.xlsx", sheet = "Sheet1")
+head(df)
+summary(df)
+```
+
+```{r}
+df_students <- df[2:32, ]
+
+head(df_students)
+# Define the new column names for the questions
+question_names <- paste0("Q", 1:20)  # Generates Q1, Q2, ..., Q20
+
+# Rename only the question columns
+colnames(df_students)[2:21] <- question_names
+
+head(df_students)
+colnames(df_students)
+```
+
+```{r}
+
+# Convert value fromat to numeric
+df_students$`Total Score` <- as.numeric(df_students$`Total Score`)
+df_students$`Quiz Time` <- as.numeric(df_students$`Quiz Time`)
+df_students$Accomodations <- as.numeric(df_students$Accomodations)
+df_students$Sex <- as.numeric(df_students$Sex)
+df_students$`Race/Ethnicity` <- as.numeric(df_students$`Race/Ethnicity`)
+df_students$`English Proficiency` <- as.numeric(df_students$`English Proficiency`)
+df_students$`Born USA` <- as.numeric(df_students$`Born USA`)
+df_students$`Home Language` <- as.numeric(df_students$`Home Language`)
+df_students$`Age arrive USA`<- as.numeric(df_students$`Age arrive USA`)
+
+
+# Convert Quiz Time from seconds to minutes
+df_students$`Quiz Time Minutes` <- df_students$`Quiz Time` / 60 # for later test
+# Create Quiz Time Bins
+df_students$`Quiz Time Group` <- cut(df_students$`Quiz Time Minutes`, 
+                                   breaks = c(0, 10, 20, Inf), 
+                                   labels = c("0-10 min", "10-20 min", "20+ min"),
+                                   include.lowest = TRUE)
+
+# Check new groups
+table(df_students$`Quiz Time Group`)
+
+
+# Verify changes
+str(df_students)
+```
+T-test
+1.English Proiciency
+```{r}
+group1 <- df_students$`Total Score`[df_students$`English Proficiency` == 0]
+group2 <- df_students$`Total Score`[df_students$`English Proficiency` == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+2.Race
+```{r}
+group1 <- df_students$`Total Score`[df_students$`Race/Ethnicity` == 0]
+group2 <- df_students$`Total Score`[df_students$`Race/Ethnicity` == 1]
+
+t_Race <- t.test(group1, group2, var.equal = TRUE)  
+print(t_Race)
+```
+3.Home Language
+```{r}
+group1 <- df_students$`Total Score`[df_students$`Home Language` == 0]
+group2 <- df_students$`Total Score`[df_students$`Home Language` == 1]
+
+t_HomeLanguage <- t.test(group1, group2, var.equal = TRUE)  
+print(t_HomeLanguage)
+```
+
+U-test
+1.Sex
+```{r}
+u_test_sex <- wilcox.test(df_students$`Total Score` ~ df_students$Sex, exact = FALSE)
+
+print(u_test_sex)
+
+```
+2.Born USA
+```{r}
+
+u_test_born <- wilcox.test(df_students$`Total Score` ~ df_students$`Born USA`, exact = FALSE)
+
+print(u_test_born)
+
+```
+
+3.Accomodations
+```{r}
+u_test_accomodations <- wilcox.test(df_students$`Total Score` ~ df_students$Accomodations, exact = FALSE)
+
+print(u_test_accomodations)
+
+```
+
+We can find in all those different grouping method, the P-value is larger than 0.05, which means  there is no such a huge difference between diffient groups.
