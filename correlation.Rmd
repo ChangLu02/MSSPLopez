@@ -97,5 +97,15 @@ kendall_corr <- cor(combined_IDPB$Item_Difficulty,
 print(paste("Kendall Correlation coef:", round(kendall_corr, 3)))
 ```
 
-The relationship is weak to moderate (0.423 Pearson, 0.361 Spearman, 0.244 Kendall).
+4. Correlation to chose
+```{r}
+shapiro.test(combined_IDPB$Item_Difficulty)
+
+shapiro.test(combined_IDPB$Point_Biserial_Correlation)
+```
+From the Shapiro-Wilk normality test results:
+Item Difficulty: p-value = 0.6546, which is normally distributed (fails to reject normality).
+Point Biserial Correlation: p-value = 0.01516, which means it is not normally distributed (rejects normality).
+
+Since one variable (Point Biserial Correlation) is not normally distributed, Spearman’s Rank Correlation is a better choice than Pearson.The relationship is weak to moderate (0.423 Pearson, 0.361 Spearman, 0.244 Kendall).
 In a word, some easy questions do have higher discrimination power. However, not all easy questions discriminate well, and medium-difficulty questions (0.4-0.6) tend to be the best discriminators.
