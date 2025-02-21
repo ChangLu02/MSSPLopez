@@ -28,8 +28,9 @@ Since U-test and T-test only focus on binary data, so some category data like 'A
 
 4. Born in USA
 ```{r}
+library(readxl)
 df <- read_excel("MAMS and Dental Combined for Analysis.xlsx", sheet = "Sheet1")
-head(df)
+df
 summary(df)
 ```
 
@@ -76,6 +77,8 @@ table(df_students$`Quiz Time Group`)
 # Verify changes
 str(df_students)
 ```
+
+
 T-test
 1.English Proiciency
 ```{r}
@@ -111,6 +114,8 @@ u_test_sex <- wilcox.test(df_students$`Total Score` ~ df_students$Sex, exact = F
 print(u_test_sex)
 
 ```
+Sex is 0.139, which is not verified to the U test from client.
+
 2.Born USA
 ```{r}
 
@@ -119,7 +124,7 @@ u_test_born <- wilcox.test(df_students$`Total Score` ~ df_students$`Born USA`, e
 print(u_test_born)
 
 ```
-
+The p-value of Born in USA is also different 
 3.Accomodations
 ```{r}
 u_test_accomodations <- wilcox.test(df_students$`Total Score` ~ df_students$Accomodations, exact = FALSE)
