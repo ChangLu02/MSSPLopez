@@ -1,8 +1,10 @@
 ---
 title: "T_test"
-author: "sts"
+author: "Qiuyi Feng"
 date: "2025-02-20"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
