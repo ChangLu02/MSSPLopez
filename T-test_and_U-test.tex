@@ -1,0 +1,222 @@
+---
+title: "T_test"
+author: "Qiuyi Feng"
+date: "2025-02-20"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+\begin{verbatim}
+knitr::opts_chunk$set(echo = TRUE)
+\end{verbatim}
+
+\begin{verbatim}
+df_students<-read.csv('df_students.csv')
+\end{verbatim}
+\begin{verbatim}
+df_students
+\end{verbatim}
+Difference Between U-Test and T-Test
+1. Definition & Purpose
+T-Test: A parametric test used to compare the means of two groups to determine if they are significantly different. It assumes that the data follows a normal distribution.
+U-Test (Mann-Whitney U Test): A non-parametric test used to compare differences between two independent groups when the data does not necessarily follow a normal distribution.
+2. Underlying Principle
+T-Test: Based on the assumption that the sample data is normally distributed and uses means and variances to assess differences between groups.
+U-Test: Ranks all observations from both groups together and compares the sum of ranks instead of actual data values.
+
+
+
+
+Since U-test and T-test only focus on binary data, so some category data like 'Age Arrive USA', continous data 'quiz time(categorized by 10 minutes)' don't work.
+
+
+1. quiz time(categorized by 10 minutes) //We didn't test because it is not binary variable.//
+
+2. English Proficiency
+
+3. Race
+
+4. Home Language
+
+#### Mann-Whitney U Test
+
+1. Accomodations
+
+2. Age Arrive USA //We didn't test because it is not binary variable.//
+
+
+3. Sex
+
+4. Born in USA
+
+
+In T and U test, We only consider whether P-value is smaller than 0.05 or not. If P-value is greater than 0.05, these two different groups have no such a significant difference in the persepective of response variable.
+
+T-test
+1.English Proiciency
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$\texttt{English.Proficiency} == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$\texttt{English.Proficiency} == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+2.Race
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$\texttt{Race.Ethnicity} == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$\texttt{Race.Ethnicity} == 1]
+
+t_Race <- t.test(group1, group2, var.equal = TRUE)  
+print(t_Race)
+\end{verbatim}
+3.Home Language
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$\texttt{Home.Language} == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$\texttt{Home.Language} == 1]
+
+t_HomeLanguage <- t.test(group1, group2, var.equal = TRUE)  
+print(t_HomeLanguage)
+\end{verbatim}
+4.Sex
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$Sex == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$Sex == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+5.Born USA
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$\texttt{Born.USA} == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$\texttt{Born.USA} == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+
+6.Accomodations
+\begin{verbatim}
+group1 <- df_students$\texttt{Total.Score}[df_students$Accomodations == 0]
+group2 <- df_students$\texttt{Total.Score}[df_students$Accomodations == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+U-test
+1.Sex
+\begin{verbatim}
+u_test_sex <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$Sex, exact = FALSE)
+
+print(u_test_sex)
+
+\end{verbatim}
+Sex is 0.139, which is not verified to the U test from client.
+
+2.Born USA
+\begin{verbatim}
+
+u_test_born <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$\texttt{Born.USA}, exact = FALSE)
+
+print(u_test_born)
+
+\end{verbatim}
+The p-value of Born in USA is also different 
+3.Accomodations
+\begin{verbatim}
+u_test_accomodations <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$Accomodations, exact = FALSE)
+
+print(u_test_accomodations)
+
+\end{verbatim}
+
+4.English 
+\begin{verbatim}
+
+u_test_english <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$\texttt{English.Proficiency}, exact = FALSE)
+
+print(u_test_english)
+
+\end{verbatim}
+
+5.Race
+\begin{verbatim}
+
+u_test_race <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$\texttt{Race.Ethnicity}, exact = FALSE)
+
+print(u_test_race)
+
+\end{verbatim}
+
+6.Home language
+\begin{verbatim}
+
+u_test_homelanguage <- wilcox.test(df_students$\texttt{Total.Score} ~ df_students$\texttt{Home.Language}, exact = FALSE)
+
+print(u_test_homelanguage)
+
+\end{verbatim}
+In order to get a comprehensive result, We also calculated  t test for those none-normal distributed and the u test for those normal distributed data.
+
+
+1.race_T
+\begin{verbatim}
+group1 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 0]
+group2 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 1]
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+2.Enlgish_T
+\begin{verbatim}
+group1 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 0]
+group2 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+3.BornUS_T
+\begin{verbatim}
+group1 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 0]
+group2 <- df_students$\texttt{Quiz.Time}[df_students$\texttt{English.Proficiency} == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+\end{verbatim}
+
+1.race_U
+\begin{verbatim}
+
+u_test_race_quiztime <- wilcox.test(df_students$\texttt{Quiz.Time} ~ df_students$\texttt{Race.Ethnicity}, exact = FALSE)
+
+print(u_test_race_quiztime)
+
+\end{verbatim}
+2.English_U
+\begin{verbatim}
+
+u_test_english_quiztime <- wilcox.test(df_students$\texttt{Quiz.Time} ~ df_students$\texttt{English.Proficiency}, exact = FALSE)
+
+print(u_test_english_quiztime)
+
+\end{verbatim}
+3.BornUS_U
+\begin{verbatim}
+
+u_test_born_quiztime <- wilcox.test(df_students$\texttt{Quiz.Time} ~ df_students$\texttt{Born.USA}, exact = FALSE)
+
+print(u_test_born_quiztime)
+
+\end{verbatim}
+
+\begin{verbatim}
+chisq.test(table(df_students$\texttt{Quiz.Time.Group}, df_students$\texttt{English.Proficiency}))
+\end{verbatim}
+
+
+We can find in all those different grouping method, the P-value is larger than 0.05, which means  there is no such a huge difference between diffient groups.

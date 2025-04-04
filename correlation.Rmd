@@ -88,6 +88,17 @@ spearman_corr <- cor(combined_IDPB$Item_Difficulty,
 print(paste("Spearman's Rank Correlation coef:", round(spearman_corr, 3)))
 ```
 
+```{r, warning=FALSE}
+# Create Spearman correlation scatter plot with trend line
+ggplot(combined_IDPB, aes(x = Item_Difficulty, y = Point_Biserial_Correlation)) +
+  geom_point(color = "blue", size = 3) +  # Scatter points
+  geom_smooth(method = "loess", se = FALSE, color = "red") +  # Nonlinear trend line
+  labs(title = "Spearman Correlation: Item Difficulty vs. Point Biserial Correlation",
+       x = "Item Difficulty",
+       y = "Point Biserial Correlation") +
+  theme_minimal()
+  ```
+
 3. Kendall Tau correlation
 ```{r}
 kendall_corr <- cor(combined_IDPB$Item_Difficulty, 
