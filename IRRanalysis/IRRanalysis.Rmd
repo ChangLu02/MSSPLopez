@@ -175,11 +175,11 @@ ggplot(plot_data, aes(x = Criterion, y = Kappa, fill = Fill)) +
   geom_text(aes(label = Label), vjust = -0.5, size = 3) +
   scale_fill_manual(
     values = c(
-      "Perfect" = "",
-      "Excellent" = "seagreen",
+      "Perfect" = "black",
+      "Excellent" = "green",
       "Moderate" = "blue",
-      "Low" = "tomato",
-      "Missing" = "gray80"
+      "Low" = "orange",
+      "Missing" = "gray"
     )
   ) +
   labs(
