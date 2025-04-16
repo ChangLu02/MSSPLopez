@@ -214,8 +214,67 @@ if (nrow(q1_filtered) >= 2) {
   print("Not enough usable criteria to compute kappa for Question 1.")
 }
 ```
+```{r, warning=FALSE}
+light_kappa_by_question <- data.frame(
+  Question = character(),
+  Subjects = integer(),
+  Raters = integer(),
+  Kappa = numeric(),
+  Z = numeric(),
+  P_value = numeric(),
+  stringsAsFactors = FALSE
+)
 
-```{r}
+for (q in paste0("Q", 1:30)) {
+  q_data <- all_ratings %>%
+    filter(Question == q) %>%
+    pivot_wider(names_from = Rater, values_from = Score) %>%
+    select(-Question, -Criterion)
+  
+  q_data[q_data == "N/A"] <- NA
+
+  q_filtered <- q_data[rowSums(!is.na(q_data)) >= 2, ]
+  
+  if (nrow(q_filtered) >= 2) {
+    q_matrix <- as.matrix(q_filtered)
+    result <- tryCatch({
+      kappa <- kappam.light(q_matrix)
+      data.frame(
+        Question = q,
+        Subjects = kappa$subjects,
+        Raters = kappa$raters,
+        Kappa = kappa$value,
+        Z = kappa$statistic,
+        P_value = kappa$p.value
+      )
+    }, error = function(e) {
+      data.frame(
+        Question = q,
+        Subjects = nrow(q_filtered),
+        Raters = ncol(q_filtered),
+        Kappa = NA,
+        Z = NA,
+        P_value = NA
+      )
+    })
+  } else {
+    result <- data.frame(
+      Question = q,
+      Subjects = nrow(q_filtered),
+      Raters = ifelse(nrow(q_data) > 0, ncol(q_data), NA),
+      Kappa = NA,
+      Z = NA,
+      P_value = NA
+    )
+  }
+  
+  light_kappa_by_question <- rbind(light_kappa_by_question, result)
+}
+
+print(light_kappa_by_question)
+
+```
+```{r, include=FALSE}
 kappa_by_question <- data.frame(
   Question = character(),
   Criteria = integer(),
@@ -265,7 +324,7 @@ kappa_by_question
 ```
 
 
-```{r}
+```{r, include=FALSE}
 # all criteria used
 kappa_by_question <- data.frame(
   Question = character(),
