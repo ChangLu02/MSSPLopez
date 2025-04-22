@@ -11,6 +11,7 @@ library("dplyr")
 library(ggplot2)
 library(tidyr)
 library(irr)
+library(tidyverse)
 ```
 
 ### part 1 kappa by criteria
@@ -375,4 +376,100 @@ for (q in paste0("Q", 1:30)) {
 }
 
 kappa_by_question
+```
+
+
+### Wide format
+
+```{r}
+df <- all_ratings %>%
+  pivot_wider(
+    names_from = Rater,
+    values_from = Score
+  )
+head(df)
+```
+
+```{r}
+kappam.light(df %>% select(Latchman:Wagner))
+```
+
+```{r, warning=FALSE}
+# Compute Light's Kappa for each Criterion
+df_kappa_criterion <- df %>%
+  group_split(Criterion) %>%
+  map_dfr(function(group_df) {
+    ratings <- group_df %>% select(Latchman:Wagner)
+    crit <- unique(group_df$Criterion)
+
+    if (nrow(ratings) < 2) {
+      return(tibble(Criterion = crit, Light_Kappa = NA))
+    }
+
+    kappa_value <- tryCatch(
+      kappam.fleiss(ratings)$value,
+      error = function(e) NA
+    )
+
+    tibble(Criterion = crit, Light_Kappa = kappa_value)
+  })
+
+
+df_kappa_criterion
+```
+
+```{r}
+# Plot
+
+ggplot(df_kappa_criterion, aes(x = factor(Criterion), y = Light_Kappa, fill = Light_Kappa)) +
+  geom_col() +
+  geom_text(aes(label = round(Light_Kappa, 2)), vjust = -0.5) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Light’s Kappa per Criterion",
+    x = "Criterion",
+    y = "Light's Kappa"
+  ) +
+  theme_minimal()
+```
+
+```{r, warning=FALSE}
+# Compute Light's Kappa for each Question
+df_kappa_question <- df %>%
+  group_split(Question) %>%
+  map_dfr(function(group_df) {
+    ratings <- group_df %>% select(Latchman:Wagner)
+    ques <- unique(group_df$Question)
+
+    if (nrow(ratings) < 2) {
+      # only one question = not enough for kappam.fleiss
+      return(tibble(Question = ques, Light_Kappa = NA))
+    }
+
+    kappa_value <- tryCatch(
+      kappam.fleiss(ratings)$value,
+      error = function(e) NA
+    )
+
+    tibble(Question = ques, Light_Kappa = kappa_value)
+  })
+
+df_kappa_question
+```
+
+```{r, fig.width=12, fig.height=5, warning=FALSE}
+# Plot
+df_kappa_question <- df_kappa_question %>%
+  mutate(Question = factor(Question, levels = paste0("Q", 1:30)))
+
+ggplot(df_kappa_question, aes(x = factor(Question), y = Light_Kappa, fill = Light_Kappa)) +
+  geom_col() +
+  geom_text(aes(label = round(Light_Kappa, 2)), vjust = -0.5) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(
+    title = "Light’s Kappa per Question",
+    x = "Question",
+    y = "Light's Kappa"
+  ) +
+  theme_minimal()
 ```
