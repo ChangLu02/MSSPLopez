@@ -107,6 +107,33 @@ group2 <- df_students$`Total Score`[df_students$`Home Language` == 1]
 t_HomeLanguage <- t.test(group1, group2, var.equal = TRUE)  
 print(t_HomeLanguage)
 ```
+4.Sex
+```{r}
+group1 <- df_students$`Total Score`[df_students$Sex == 0]
+group2 <- df_students$`Total Score`[df_students$Sex == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+5.Born USA
+```{r}
+group1 <- df_students$`Total Score`[df_students$`Born USA` == 0]
+group2 <- df_students$`Total Score`[df_students$`Born USA` == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+
+6.Accomodations
+```{r}
+group1 <- df_students$`Total Score`[df_students$Accomodations == 0]
+group2 <- df_students$`Total Score`[df_students$Accomodations == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
 
 U-test
 1.Sex
@@ -134,5 +161,92 @@ u_test_accomodations <- wilcox.test(df_students$`Total Score` ~ df_students$Acco
 print(u_test_accomodations)
 
 ```
+
+4.English 
+```{r}
+
+u_test_english <- wilcox.test(df_students$`Total Score` ~ df_students$`English Proficiency`, exact = FALSE)
+
+print(u_test_english)
+
+```
+
+5.Race
+```{r}
+
+u_test_race <- wilcox.test(df_students$`Total Score` ~ df_students$`Race/Ethnicity`, exact = FALSE)
+
+print(u_test_race)
+
+```
+
+6.Home language
+```{r}
+
+u_test_homelanguage <- wilcox.test(df_students$`Total Score` ~ df_students$`Home Language`, exact = FALSE)
+
+print(u_test_homelanguage)
+
+```
+
+1.race_T
+```{r}
+group1 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 0]
+group2 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 1]
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+2.Enlgish_T
+```{r}
+group1 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 0]
+group2 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+3.BornUS_T
+```{r}
+group1 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 0]
+group2 <- df_students$`Quiz Time`[df_students$`English Proficiency` == 1]
+
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+
+1.race_U
+```{r}
+
+u_test_race_quiztime <- wilcox.test(df_students$`Quiz Time` ~ df_students$`Race/Ethnicity`, exact = FALSE)
+
+print(u_test_race_quiztime)
+
+```
+2.English_U
+```{r}
+
+u_test_english_quiztime <- wilcox.test(df_students$`Quiz Time` ~ df_students$`English Proficiency`, exact = FALSE)
+
+print(u_test_english_quiztime)
+
+```
+3.BornUS_U
+```{r}
+
+u_test_born_quiztime <- wilcox.test(df_students$`Quiz Time` ~ df_students$`Born USA`, exact = FALSE)
+
+print(u_test_born_quiztime)
+
+```
+linear regression
+```{r}
+model <- lm(`Total Score` ~ `Accomodations`+`Sex`+`Race/Ethnicity`+`English Proficiency`+ `Born USA` +`Home Language`+`Age arrive USA`, data = df_students)
+summary(model)
+```
+```{r}
+chisq.test(table(df_students$`Quiz Time Group`, df_students$`English Proficiency`))
+```
+
 
 We can find in all those different grouping method, the P-value is larger than 0.05, which means  there is no such a huge difference between diffient groups.
