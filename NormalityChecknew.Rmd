@@ -1,0 +1,329 @@
+---
+title: "Newdata"
+author: "Chang Lu"
+date: "2025-03-27"
+output: pdf_document
+---
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(purrr)
+library(readxl)
+```
+
+```{r, include=FALSE}
+mams_df   <- read_excel("Click Times for MAMS and Dental Students.xlsx", sheet = "MAMS Students")
+dental_df <- read_excel("Click Times for MAMS and Dental Students.xlsx", sheet = "Dental Students")
+
+mams_df   <- mams_df[-1, ]
+dental_df <- dental_df[-1, ]
+
+# nrow(mams_df)   
+# nrow(dental_df)   
+
+dental_df <- dental_df %>% filter(Progress != "Progress")
+
+#nrow(dental_df)
+
+
+combined_df <- bind_rows(mams_df, dental_df)
+summary(combined_df)
+```
+
+```{r}
+# Computing Total_Quit_Time_Computed
+submit_time_cols <- names(combined_df)[str_detect(names(combined_df), "-T_Page Submit")]
+
+combined_df$Total_Quit_Time_Computed <- combined_df %>%
+  select(all_of(submit_time_cols)) %>%
+  mutate_all(as.numeric) %>%
+  rowSums(na.rm = TRUE)
+
+
+combined_df %>% select(...1, Total_Quit_Time_Computed) %>% head()
+length(combined_df$Total_Quit_Time_Computed)
+```
+
+
+```{r}
+# Rename demographic groups
+combined_df <- combined_df %>%
+  rename(
+    Accommodations       = Q21,
+    Gender               = Q22,
+    Ethnicity            = Q23,
+    English_Proficiency  = Q24,
+    Country_You          = Q25_1,
+    Country_Mother       = Q25_2,
+    Country_Father       = Q25_3,
+    Home_Language        = Q69
+  ) %>%
+  select(-Q68)  # Drop Q68 for a few people answered
+
+
+```
+```{r}
+combined_df
+```
+
+
+### Normality Check
+
+
+#### Accomodations
+
+```{r}
+# # Accomodations
+# group_yes <- combined_df %>% filter(Accommodations == "Yes") %>% pull(Total_Quit_Time_Computed)
+# group_no  <- combined_df %>% filter(Accommodations == "No") %>% pull(Total_Quit_Time_Computed)
+# 
+# # Shapiro-Wilk test
+# shapiro.test(group_yes)
+# shapiro.test(group_no)
+```
+```{r}
+# par(mfrow = c(2, 2))  # Plot layout
+# 
+# # Histogram
+# hist(group_yes, main = "Accommodations: YES", xlab = "Total Time", col = "skyblue")
+# hist(group_no, main = "Accommodations: NO", xlab = "Total Time", col = "salmon")
+# 
+# # Q-Q plots
+# qqnorm(group_yes); qqline(group_yes, col = "blue")
+# qqnorm(group_no); qqline(group_no, col = "red")
+```
+
+Error in shapiro.test(group_yes) : sample size must be between 3 and 5000 -> Mann–Whitney U test
+
+#### Gender
+```{r}
+# Group sizes
+table(combined_df$Gender)
+
+# Normality check
+by(combined_df$Total_Quit_Time_Computed, combined_df$Gender, shapiro.test)
+```
+
+We tested whether total quit time differed by gender. The Female group violated the assumption of normality (Shapiro-Wilk p < 0.001), so we used a non-parametric Mann–Whitney U test.
+
+#### Race
+
+```{r}
+table(combined_df$Ethnicity)
+
+# Kruskal-Wallis test (non-parametric ANOVA)
+kruskal.test(Total_Quit_Time_Computed ~ Ethnicity, data = combined_df)
+```
+
+A Kruskal-Wallis test revealed no significant difference in total quit time across ethnic groups ($\chi^2(4)$ = 1.06, p = 0.901).
+
+#### English Proficiency
+
+```{r}
+# Clean and recode English proficiency
+combined_df <- combined_df %>%
+  mutate(English_Proficiency = case_when(
+    str_trim(English_Proficiency) %in% c("Native", "Native Speaker") ~ "Native",
+    str_trim(English_Proficiency) == "Fluent" ~ "Fluent",
+    TRUE ~ English_Proficiency  # keep as-is in case there's other unexpected values
+  ))
+
+table(combined_df$English_Proficiency)
+
+wilcox.test(Total_Quit_Time_Computed ~ English_Proficiency, data = combined_df)
+```
+
+A Wilcoxon rank-sum test found no significant difference in total quit time between Fluent and Native English speakers (W = 113, p = 0.89)
+
+#### Born in US
+
+```{r}
+# You
+combined_df <- combined_df %>%
+  mutate(Born_in_US = ifelse(Country_You == "United States", "Yes", "No"))
+
+wilcox.test(Total_Quit_Time_Computed ~ Born_in_US, data = combined_df)
+```
+
+A Wilcoxon rank-sum test found no significant difference in total quit time between students born in the U.S. and those born elsewhere (W = 92, p = 0.73).
+
+
+```{r}
+# Mother
+combined_df <- combined_df %>%
+  mutate(Born_in_US_M = ifelse(Country_Mother == "United States", "Yes", "No"))
+
+wilcox.test(Total_Quit_Time_Computed ~ Born_in_US_M, data = combined_df)
+```
+
+A Wilcoxon rank-sum test comparing total quit time by mother's country of birth showed a trend toward significance (W = 156, p = 0.093), but did not reach conventional significance levels. It may need larger sample size to support.
+
+
+```{r}
+# Father
+combined_df <- combined_df %>%
+  mutate(Born_in_US_F = ifelse(Country_Father == "United States", "Yes", "No"))
+
+wilcox.test(Total_Quit_Time_Computed ~ Born_in_US_F, data = combined_df)
+```
+
+A Wilcoxon rank-sum test showed no significant difference in total quit time based on father’s country of birth (W = 149, p = 0.211).
+
+#### Home Language
+
+```{r}
+combined_df <- combined_df %>%
+  mutate(English_Home = ifelse(Home_Language == "English", "Yes", "No"))
+
+wilcox.test(Total_Quit_Time_Computed ~ English_Home, data = combined_df)
+```
+
+A Wilcoxon rank-sum test showed no significant difference in total quit time between students who spoke English at home and those who did not (W = 152, p = 0.130).
+
+### To qiuyi
+
+Hi Qiuyi, when comparing total quit time across demographic groups, here's how to decide between using a t-test or the Mann–Whitney U test:
+
+
+Use t-test if:
+Both groups have at least 10 observations and the distribution of total quit time is approximately normal in both groups (check via Shapiro-Wilk or Q-Q plot)(I didnt draw plots) \\
+
+Use Mann–Whitney U test if:
+1.One or both groups violate normality
+
+2.Sample size is small (especially < 10)
+
+### T-test and U-test
+
+Due to the sample size, we decide to use both T-test and U-test to check each variable. The reason is that even the specific variable corresponding to the normality check but the small sample size leads to a large variance so we cannot believe the simple result.
+
+## 1.English Proficiency
+
+```{r}
+group1 <- combined_df$`Total_Quit_Time_Computed`[combined_df$`English_Proficiency` == 'Fluent']
+group2 <- combined_df$`Total_Quit_Time_Computed`[combined_df$`English_Proficiency` == 'Native']
+t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+print(t_test_result)
+```
+```{r}
+u_test_english <- wilcox.test(combined_df$Total_Quit_Time_Computed ~ combined_df$English_Proficiency, exact = FALSE)
+
+print(u_test_english)
+```
+
+## 2.Race
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Ethnicity == 'White']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Ethnicity != 'White']
+
+t_Race <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_Race)
+
+```
+```{r}
+u_test_race <- wilcox.test(combined_df$Total_Quit_Time_Computed ~ (combined_df$Ethnicity == 'White'), exact = FALSE)
+
+print(u_test_race)
+
+```
+
+## 3.Country_you
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_You == 'United States']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_You != 'United States']
+
+t_Country <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_Country)
+```
+```{r}
+u_test_country <- wilcox.test(group1, group2, exact = FALSE)
+
+print(u_test_country)
+
+```
+## 4.Country Mother
+
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_Mother == 'United States']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_Mother != 'United States']
+
+t_Mother <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_Mother)
+
+```
+```{r}
+u_test_mother <- wilcox.test(group1, group2, exact = FALSE)
+
+print(u_test_mother)
+```
+## 5.Country Father
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_Father == 'United States']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Country_Father != 'United States']
+
+t_Father <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_Father)
+
+```
+
+```{r}
+u_test_father <- wilcox.test(group1, group2, exact = FALSE)
+
+print(u_test_father)
+
+```
+
+
+## 6.Home Language
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Home_Language == 'English']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Home_Language != 'English']
+
+t_HomeLang <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_HomeLang)
+```
+```{r}
+u_test_homeLang <- wilcox.test(group1, group2, exact = FALSE)
+
+print(u_test_homeLang)
+
+```
+## Gender
+```{r}
+group1 <- combined_df$Total_Quit_Time_Computed[combined_df$Gender == 'Female']
+group2 <- combined_df$Total_Quit_Time_Computed[combined_df$Gender != 'Female']
+
+t_Gender <- t.test(group1, group2, var.equal = TRUE)
+
+print(t_Gender)
+```
+
+```{r}
+u_test_Gender <- wilcox.test(group1, group2, exact = FALSE)
+
+print(u_test_Gender)
+
+```
+### Conclusion
+So the final conclusion is:
+```{r}
+library(knitr)
+data1 <- data.frame(
+  Variable = c("English Proficiency", "Race", "Country You", 
+               "Country Mother", "Country Father", "Home Language", "Gender"),
+  `T-test P value` = c(0.4377, 0.9885, 0.6903, 0.6234, 0.7697, 1, 0.555),
+  `U-test P value` = c(0.8886, 0.3267, 0.7231, 0.09237, 0.2073, 0.2073, 0.2497)
+)
+
+kable(data1, caption = "P-values from T-test and U-test for different variables")
+```
+The conclusion is that almost all variables they don't have such a huge significant difference in the aspect of quiz_time.

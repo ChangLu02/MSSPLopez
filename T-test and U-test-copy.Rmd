@@ -3,8 +3,9 @@ title: "T_test"
 author: "Qiuyi Feng"
 date: "2025-02-20"
 output:
-  pdf_document: default
+  word_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,9 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 df_students<-read.csv('df_students.csv')
 ```
-```{r}
-df_students
-```
+
 Difference Between U-Test and T-Test
 1. Definition & Purpose
 T-Test: A parametric test used to compare the means of two groups to determine if they are significantly different. It assumes that the data follows a normal distribution.
@@ -100,11 +99,11 @@ print(t_test_result)
 
 6.Accomodations
 ```{r}
-group1 <- df_students$`Total.Score`[df_students$Accomodations == 0]
-group2 <- df_students$`Total.Score`[df_students$Accomodations == 1]
+#group1 <- df_students$`Total.Score`[df_students$Accomodations == 0]
+#group2 <- df_students$`Total.Score`[df_students$Accomodations == 1]
 
-t_test_result <- t.test(group1, group2, var.equal = TRUE)  
-print(t_test_result)
+#t_test_result <- t.test(group1, group2, var.equal = TRUE)  
+#print(t_test_result)
 ```
 
 U-test
